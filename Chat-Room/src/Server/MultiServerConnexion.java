@@ -8,36 +8,41 @@ import java.util.ArrayList;
 
 public class MultiServerConnexion extends Thread {
 	
-	Socket s;
-	DataInputStream din;
-	DataOutputStream dout;
-	Server ss;
+	Socket socket;
+	DataInputStream in;
+	DataOutputStream out;
+	Server server;
 	boolean quite=false;
 	
 	public MultiServerConnexion(Socket OurSocket,Server OurServer)
 	{
-		super("MultiServerConnection");//server connection thread
-		this.s=OurSocket;
-		this.ss=OurServer;
+		//recupere methode de classe mere Thread
+		super("MultiServerConnection");
+		this.socket=OurSocket;
+		this.server=OurServer;
 	}
 	
+	 
 	public void ServerOutClientIn(String OutText)
 	{
 		try {
 			long ThreadID=this.getId();
-			dout.writeUTF(OutText);
-			dout.flush();//this is because of a buffer error :<
+			//envoie info du serveur au client
+			out.writeUTF(OutText);
+			//pour forcer l'ecriture
+			out.flush();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
+	
 	public void ServerOutAllClientIn(String OutText)
 	{
-		for(int i=0;i<ss.OurDomainsConnections.size();i++)
+		for(int i=0;i<server.threadList.size();i++)
 		{
-			MultiServerConnexion Connection=ss.OurDomainsConnections.get(i);
+			MultiServerConnexion Connection=server.threadList.get(i);
 			Connection.ServerOutClientIn(OutText);
 		}
 	}
@@ -45,26 +50,26 @@ public class MultiServerConnexion extends Thread {
 	public void run()
 	{
 		try {
-			din=new DataInputStream(s.getInputStream());
-			dout=new DataOutputStream(s.getOutputStream());
+			in=new DataInputStream(socket.getInputStream());
+			out=new DataOutputStream(socket.getOutputStream());
 			
 			while(!quite)
 			{
-				while(din.available()==0)
+				while(in.available()==0)
 				{
 					try {
-						Thread.sleep(1);//sleep if there is not data coming
+						Thread.sleep(1);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
+					
 						e.printStackTrace();
 					}
 				}
-				String ComingText=din.readUTF();
+				String ComingText=in.readUTF();
 				ServerOutAllClientIn(ComingText);
 			}
-			din.close();
-			dout.close();
-			s.close();
+			in.close();
+			out.close();
+			socket.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -15,6 +15,7 @@ public class MultiConnexion extends Thread {
 	boolean quite=false;
 	public ClientData clientData;
 	public ChatRoomFrame GUI;
+	public Sauvegarde sauvegarde ;
 	
 	public MultiConnexion(Socket OurMultiSocket, ChatRoomFrame gui)
 	{
@@ -22,7 +23,10 @@ public class MultiConnexion extends Thread {
 		//creation d'un utilisateur
 		clientData=new ClientData();
 		GUI=gui;
+		sauvegarde = new Sauvegarde() ;
 	}
+	
+	//permet utilisateur d'envoyer tout type d'info au serveur
 	public void ClientOutServerIn(String Text)
 	{
 		//envoie au serveur la saisie du clavier par l'utilisateur 
@@ -36,24 +40,28 @@ public class MultiConnexion extends Thread {
 			else if(Text.equals("new user"))
 			{
 				System.out.println("sending new user: "+ Text+"\n");
+				//"new user : le nom saisie par user = sur quel channel il se trouve"
 				out.writeUTF(Text+":"+clientData.GetName()+"="+clientData.GetChannel());
 				out.flush();
 			}
 			else
 			{
-				out.writeUTF(clientData.GetChannel()+"="+this.getName()+": "+Text);
+				//message saisie par utilisateur sur serveur
+				out.writeUTF(clientData.GetChannel()+"="+this.getName()+":"+Text);
 				out.flush();
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}	
 	}
+	//modifie channel ou le nom sur serveur 
 	public void SetClient(String channel,String Name)
 	{
 		clientData.SetName(Name);
 		clientData.SetChannel(channel);
 	}
+	//reception d'info du client
 	public void run()
 	{
 		try {
@@ -63,19 +71,21 @@ public class MultiConnexion extends Thread {
 			while(!quite)
 			{
 				try {
+					//tant qu'il y a plus iren à lire 
 					while(in.available()==0)
 					{
 						try {
 							Thread.sleep(1);
 						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
+							
 							e.printStackTrace();
 						}
 					}
-					//if there is something just show it on console
-					//and then go back and do the same
+					//recupere la saisie
 					String reply=in.readUTF();
+					// recupere le canal
 					String Chan=ExtractChannel(reply);
+				
 					String name=ExtractName(reply);
 					/*if (reply.equals("change channel"))
 					{
@@ -91,31 +101,31 @@ public class MultiConnexion extends Thread {
 					}
 					else
 					{
+						//afficher dans la conv si dans meme canal
 						PrintReply(Chan,reply);
+						sauvegardeFichier(Chan, reply);
 					}
 					//System.out.println(reply);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 					try {
 						in.close();
 						out.close();
 						socket.close();
 					} catch (IOException e1) {
-						// TODO Auto-generated catch block
+						
 						e1.printStackTrace();
 					}
 				}	
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			try {
 				in.close();
 				out.close();
 				socket.close();
 			} catch (IOException x) {
-				// TODO Auto-generated catch block
 				x.printStackTrace();
 			}
 		}
@@ -127,7 +137,7 @@ public class MultiConnexion extends Thread {
 			out.close();
 			socket.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -151,17 +161,28 @@ public class MultiConnexion extends Thread {
 		}
 		
 	}
+	
+	public void sauvegardeFichier(String chan, String Rep) {
+		
+		String []Y=Rep.split("=");
+		sauvegarde.setInFile(Y[1]);
+		
+	}
+	
 	public void setChannel(String x)
 	{
 		String []Y=x.split(":");
 		String []Z=Y[1].split("=");
 		System.out.print("setting "+Z[0]+" channel to "+Z[1]+"\n");
+		//rajoute un nom d'utilisateur dans la liste 
 		GUI.setUserInChannel(Z[0]);
 	}
 	public void setChangedChannel()
 	{
 		GUI.setUserInChannel(clientData.GetName()+": "+clientData.GetChannel());
 	}
+	
+	//objet utilisateur
 	class ClientData
 	{
 		public String ClientName;

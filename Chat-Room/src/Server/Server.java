@@ -8,9 +8,9 @@ import java.util.ArrayList;
 
 public class Server {
 
-	ServerSocket ss;
+	ServerSocket serversocket;
 	boolean quite=false;
-	ArrayList<MultiServerConnexion> OurDomainsConnections=new ArrayList<MultiServerConnexion>();
+	ArrayList<MultiServerConnexion> threadList=new ArrayList<MultiServerConnexion>();
 	
 	public static void main(String[] args) {
 		new Server();
@@ -18,14 +18,18 @@ public class Server {
 	}
 	public Server() {
 		try {
-			//TODO use method to take this as an input from user)
-			ss=new ServerSocket(3333);//here we are using connection 3333 (change as you want
+			
+			//creation d'un seruveur sur le port 3333
+			serversocket=new ServerSocket(3333);
 			while(!quite)
 			{
-				Socket s=ss.accept();//when a connection to the domain is found we accept it
+				//accepte la connexion dans le domaine de connexion
+				Socket s=serversocket.accept();
 				MultiServerConnexion OurConnection = new MultiServerConnexion(s,this);
-				OurConnection.start();//Start Thread
-				OurDomainsConnections.add(OurConnection);//add connection to our Domain Connection
+				//démarre le processus
+				OurConnection.start();
+				//ajout d'une connexion dans le domaine de connexion
+				threadList.add(OurConnection);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

@@ -109,6 +109,7 @@ public class ChatRoomFrame extends JFrame{
 				//recupère le message String rentré par utilisateur
 				string=String.format("%s", event.getActionCommand());
 				String text= message.getText();
+				//envoie au serveur l'info
 				ClientThread.ClientOutServerIn(text);
 				//remet la zone de texte à zero 
 				message.setText("");
