@@ -103,6 +103,7 @@ public class MultiConnexion extends Thread {
 					{
 						//afficher dans la conv si dans meme canal
 						PrintReply(Chan,reply);
+						//NEW
 						sauvegardeFichier(Chan, reply);
 					}
 					//System.out.println(reply);

@@ -19,7 +19,7 @@ public class Sauvegarde {
 	public Sauvegarde() {
 		
 		this.fos =null ;
-		
+		//T
 	}
 	
 	public void setInFile(String results) {
