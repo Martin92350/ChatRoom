@@ -166,4 +166,9 @@ public class ChatRoomFrame extends JFrame{
 	{
 		listUserNames.setText("");
 	}
+	public void setDisplay1(String x)
+	{
+		displayMessages.append(x); 
+	}
+	
 }

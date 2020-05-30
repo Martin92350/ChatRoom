@@ -65,6 +65,9 @@ public class MultiConnexion extends Thread {
 	public void run()
 	{
 		try {
+			appelFonction();
+			//sauvegarde.getInFile();
+			System.out.println("run");
 			//instance permettant d'avoir un flux d'entrée et de sortie (échange)
 			in=new DataInputStream(socket.getInputStream());
 			out=new DataOutputStream(socket.getOutputStream());
@@ -101,9 +104,9 @@ public class MultiConnexion extends Thread {
 					}
 					else
 					{
-						//afficher dans la conv si dans meme canal
+						//afficher dans la convsole  si dans meme canal
 						PrintReply(Chan,reply);
-						//NEW
+						//sauvegarde du contenu 
 						sauvegardeFichier(Chan, reply);
 					}
 					//System.out.println(reply);
@@ -167,6 +170,13 @@ public class MultiConnexion extends Thread {
 		
 		String []Y=Rep.split("=");
 		sauvegarde.setInFile(Y[1]);
+		
+	}
+	
+	public void appelFonction() {
+		
+		String results = sauvegarde.getInFile();
+		GUI.setDisplay1(results);
 		
 	}
 	
