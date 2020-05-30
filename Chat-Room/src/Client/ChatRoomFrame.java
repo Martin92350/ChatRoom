@@ -25,6 +25,9 @@ public class ChatRoomFrame extends JFrame{
 	private JLabel labelChannel;
 	private JLabel labelUsername;
 	private final static String newline = "\n";
+	private JPanel panel;
+	private JButton buttonGeneric;
+	private JButton buttonGroup;
 
 	public ChatRoomFrame(){
 		super("ChatRoom");
@@ -32,6 +35,10 @@ public class ChatRoomFrame extends JFrame{
 		
 		//ajout et allignement des éléments message/name/channel/displaymessages/listUsernames sur interface
 		getContentPane().setLayout(new FlowLayout());
+		
+		panel = new JPanel();
+		getContentPane().add(panel);
+		panel.setLayout(new GridLayout(0, 1, 0, 0));
 		
 		//creation d'une zone de texte avec la taille
 		displayMessages = new JTextArea(30, 30);
@@ -102,7 +109,7 @@ public class ChatRoomFrame extends JFrame{
 		public void actionPerformed(ActionEvent event){
 
 			String string = "";
-
+			thehandler handlerButton = new thehandler();
 			//on test où a eu lieu l'interaction 
 			if(event.getSource()==message)
 			{
@@ -125,7 +132,11 @@ public class ChatRoomFrame extends JFrame{
 				{
 					ClientThread.setName(string);
 					ClientThread.SetClient("channel0",string);
+					ClientThread.clientData.setChannelSelected("channel0");
 					JOptionPane.showMessageDialog(null, "name has been set: "+string);
+					buttonGeneric = new JButton("channel0");
+					buttonGeneric.addActionListener(handlerButton);
+					panel.add(buttonGeneric);
 					username.setText("");
 					username.setEditable(false);
 					message.setEditable(true);
@@ -144,31 +155,62 @@ public class ChatRoomFrame extends JFrame{
 				else
 				{
 					ClientThread.clientData.SetChannel("channel"+string);
+					ClientThread.clientData.addChannels("channel"+string);
+					
 					JOptionPane.showMessageDialog(null, "Channel has been set: channel"+string);
+					//conversations.append("channel"+string + newline);
+							
+					buttonGroup = new JButton("channel"+string);
+					buttonGroup.addActionListener(handlerButton);
+					panel.add(buttonGroup);
+									
+					panel.revalidate();
 					channel.setText("");
+										
 					ClientThread.ClientOutServerIn("change channel");
 				}
 			}
-			//JOptionPane.showMessageDialog(null, string);
+			
+			else if((event.getSource() == buttonGroup) || (event.getSource() == buttonGeneric)) {
+			    Object source = event.getSource();
+		        JButton btn = (JButton)source;
+				string = btn.getText();
+
+				System.out.println("ca marche : "+ string);
+				ClientThread.clientData.setChannelSelected(string);
+				System.out.println("Nouvelle channel : " + ClientThread.clientData.getChannelSelected());
+
+				ClientThread.ClientOutServerIn("button selected : "+string);
+			}
+			
 		}
 	}
 	
 	
-	public void setDisplay(String x)
-	{
+	public void setDisplay(String x) {
 		displayMessages.append(x + newline); 
 	}
-	public void setUserInChannel(String x)
-	{
+	
+	public void displaySavedMessaged(String recordedMessages) {
+		displayMessages.append(recordedMessages);
+		panel.revalidate();
+	}
+	
+	public void displaySavedUsers(String oldUsers) {
+		listUserNames.append(oldUsers);
+	}
+	
+	public void setUserInChannel(String x) {
 		listUserNames.append(x + newline);
 	}
-	public void ClearDisplay()
-	{
+	
+	public void clearChat() {
+		displayMessages.setText("");
+	}
+	
+	public void ClearDisplay() {
 		listUserNames.setText("");
 	}
-	public void setDisplay1(String x)
-	{
-		displayMessages.append(x); 
-	}
+
 	
 }

@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class MultiConnexion extends Thread {
 	
@@ -43,13 +44,24 @@ public class MultiConnexion extends Thread {
 				//"new user : le nom saisie par user = sur quel channel il se trouve"
 				out.writeUTF(Text+":"+clientData.GetName()+"="+clientData.GetChannel());
 				out.flush();
+				sauvegarde.setNameInFile(clientData.GetName());
+			}
+			else if(Text.matches("button selected : (.*)"))
+			{
+				out.writeUTF(Text);
+				out.flush();
+				changeFileName(Text);
+				displayMessagesPerChannel(Text);
 			}
 			else
 			{
 				//message saisie par utilisateur sur serveur
-				out.writeUTF(clientData.GetChannel()+"="+this.getName()+":"+Text);
+				String message = clientData.GetChannel()+"="+this.getName()+": "+Text;
+				out.writeUTF(message);
 				out.flush();
+				sauvegardeFichier(message);
 			}
+			
 		} catch (IOException e) {
 			
 			e.printStackTrace();
@@ -65,8 +77,8 @@ public class MultiConnexion extends Thread {
 	public void run()
 	{
 		try {
-			appelFonction();
-			//sauvegarde.getInFile();
+			affichageConversationPrincipale();
+			sauvegardeUtilisateurs();
 			System.out.println("run");
 			//instance permettant d'avoir un flux d'entrée et de sortie (échange)
 			in=new DataInputStream(socket.getInputStream());
@@ -107,7 +119,7 @@ public class MultiConnexion extends Thread {
 						//afficher dans la convsole  si dans meme canal
 						PrintReply(Chan,reply);
 						//sauvegarde du contenu 
-						sauvegardeFichier(Chan, reply);
+					
 					}
 					//System.out.println(reply);
 				} catch (IOException e) {
@@ -145,39 +157,61 @@ public class MultiConnexion extends Thread {
 			e.printStackTrace();
 		}
 	}
+	
+	public void displayMessagesPerChannel(String text){
+		
+		GUI.clearChat();
+		String[]Y=text.split(": ");
+		String X = sauvegarde.getInFile("sauvegarde-"+Y[1]+".txt");
+		GUI.setDisplay(X);
+	}
+	
 	public String ExtractName(String x)
 	{
 		String[]Y=x.split(":");
 		return Y[0];
 	}
+	
 	public String ExtractChannel(String X)
 	{
 		String[]Y=X.split("=");
 		return Y[0];
 	}
+	
+	public void changeFileName(String text) {
+		String[]Y=text.split(": ");
+		sauvegarde.setnomDeFichier(Y[1]);
+	}
+	
 	public void PrintReply(String Chan,String Rep)
 	{
-		if(clientData.GetChannel().equals(Chan))
-		{
+		if(Chan.contentEquals(clientData.getChannelSelected())) {
+			System.out.println("Rep => "+ Rep);
 			String []Y=Rep.split("=");
+			System.out.println("Y[1] => "+ Y[1]);
+			
 			GUI.setDisplay(Y[1]);
-			//System.out.println(Y[1]+"\n \n \n \n");
 		}
 		
 	}
 	
-	public void sauvegardeFichier(String chan, String Rep) {
+	public void sauvegardeFichier(String Rep) {
 		
-		String []Y=Rep.split("=");
-		sauvegarde.setInFile(Y[1]);
-		
+		if(!Rep.contentEquals("change channel")) {
+			String []Y=Rep.split("=");
+			sauvegarde.setInFile(Y[1]);
+		}
 	}
 	
-	public void appelFonction() {
+	public void affichageConversationPrincipale() {
 		
-		String results = sauvegarde.getInFile();
-		GUI.setDisplay1(results);
-		
+		String oldMessages = sauvegarde.getInFile("sauvegarde-channel0.txt");
+		GUI.displaySavedMessaged(oldMessages);
+	}
+	
+	private void sauvegardeUtilisateurs() {
+		String oldUsers = sauvegarde.getNameInFile();
+		GUI.displaySavedUsers(oldUsers);
 	}
 	
 	public void setChannel(String x)
@@ -198,22 +232,49 @@ public class MultiConnexion extends Thread {
 	{
 		public String ClientName;
 		public String channel;
+		public ArrayList<String> channels = new ArrayList<String>();
+		private String channelSelected = ""; 
+
+
 		
-		public void SetChannel(String Chan)
-		{
+		public void SetChannel(String Chan) {
 			channel=Chan;
 		}
-		public void SetName(String name)
-		{
+		
+		public void SetName(String name) {
 			ClientName=name;
 		}
-		public String GetChannel()
-		{
+		
+		public String GetChannel() {
 			return channel;
 		}
-		public String GetName()
-		{
+		
+		public String GetName() {
 			return ClientName;
+		}
+		
+		public void setChannelSelected(String channel) {
+			channelSelected = channel;
+		}
+		
+		public String getChannelSelected() {
+			return channelSelected;
+		}
+		
+		public void addChannels(String newChannel) {
+			channels.add(newChannel);
+			System.out.println("Channels : ");
+			for(String chan : channels) {
+				System.out.println(chan);
+			}
+		}
+		
+		public void removeChannels(String newChannel) {
+			channels.remove(newChannel);
+			System.out.println("Channels de " + this.GetName() + ": ");
+			for(String chan : channels) {
+				System.out.println(chan + "\n");
+			}
 		}
 	}
 	
