@@ -28,7 +28,8 @@ public class View extends JFrame{
 	private JPanel panel;
 	private JButton buttonGeneric;
 	private JButton buttonGroup;
-
+	private JButton buttonDelete ;
+	
 	public View(){
 		super("ChatRoom");
 		
@@ -114,6 +115,7 @@ public class View extends JFrame{
 			//on test où a eu lieu l'interaction 
 			if(event.getSource()==message)
 			{
+				
 				//recupère le message String rentré par utilisateur
 				string=String.format("%s", event.getActionCommand());
 				String text= message.getText();
@@ -183,6 +185,20 @@ public class View extends JFrame{
 				System.out.println("Nouvelle channel : " + controller.donnéesUtilisateur.getChannelSelected());
 
 				controller.ClientOutServerIn("button selected : "+string);
+			}
+			else if(event.getSource() == buttonDelete ) {
+				
+				Object source = event.getSource();
+		        JButton btn = (JButton)source;
+				string = btn.getText();
+
+				System.out.println("ca marche : "+ string);
+				controller.callSetChannelSelected(string);
+				System.out.println("Nouvelle channel : " + controller.donnéesUtilisateur.getChannelSelected());
+
+				controller.ClientOutServerIn("button selected : "+string);
+				
+				clearChat();
 			}
 			
 		}
