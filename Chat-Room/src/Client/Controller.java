@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class MultiConnexion extends Thread {
+public class Controller extends Thread {
 	
 	Socket socket;
 	//lecture de type primitif
@@ -14,15 +14,15 @@ public class MultiConnexion extends Thread {
 	//ecriture de type primitif
 	DataOutputStream out;
 	boolean quite=false;
-	public ClientData clientData;
-	public ChatRoomFrame GUI;
+	public Model donnéesUtilisateur;
+	public View GUI;
 	public Sauvegarde sauvegarde ;
 	
-	public MultiConnexion(Socket OurMultiSocket, ChatRoomFrame gui)
+	public Controller(Socket OurMultiSocket, View gui)
 	{
 		socket=OurMultiSocket;
 		//creation d'un utilisateur
-		clientData=new ClientData();
+		donnéesUtilisateur=new Model();
 		GUI=gui;
 		sauvegarde = new Sauvegarde() ;
 	}
@@ -37,15 +37,15 @@ public class MultiConnexion extends Thread {
 				System.out.println("sending changing channel: "+Text+"\n");
 				out.writeUTF(Text);
 				out.flush();
-				sauvegarde.setUsersChannelInFile(clientData.GetName(), clientData.getChannelSelected());
+				sauvegarde.setUsersChannelInFile(donnéesUtilisateur.GetName(), donnéesUtilisateur.getChannelSelected());
 			}
 			else if(Text.equals("new user"))
 			{
 				System.out.println("sending new user: "+ Text+"\n");
 				//"new user : le nom saisie par user = sur quel channel il se trouve"
-				out.writeUTF(Text+":"+clientData.GetName()+"="+clientData.GetChannel());
+				out.writeUTF(Text+":"+donnéesUtilisateur.GetName()+"="+donnéesUtilisateur.GetChannel());
 				out.flush();
-				sauvegarde.setUsersChannelInFile(clientData.GetName(), clientData.getChannelSelected());
+				sauvegarde.setUsersChannelInFile(donnéesUtilisateur.GetName(), donnéesUtilisateur.getChannelSelected());
 			}
 			else if(Text.matches("button selected : (.*)"))
 			{
@@ -57,12 +57,12 @@ public class MultiConnexion extends Thread {
 				displayMessagesPerChannel(Text);
 				
 				changeUsersChannel(Text);
-				displayUsername(clientData.getChannelSelected());
+				displayUsernamePerChannel(donnéesUtilisateur.getChannelSelected());
 			}
 			else
 			{
 				//message saisie par utilisateur sur serveur
-				String message = clientData.GetChannel()+"="+this.getName()+": "+Text;
+				String message = donnéesUtilisateur.GetChannel()+"="+this.getName()+": "+Text;
 				out.writeUTF(message);
 				out.flush();
 				sauvegardeFichier(message);
@@ -76,8 +76,8 @@ public class MultiConnexion extends Thread {
 	//modifie channel ou le nom sur serveur 
 	public void SetClient(String channel,String Name)
 	{
-		clientData.SetName(Name);
-		clientData.SetChannel(channel);
+		donnéesUtilisateur.SetName(Name);
+		donnéesUtilisateur.SetChannel(channel);
 	}
 	//reception d'info du client
 	public void run()
@@ -165,6 +165,38 @@ public class MultiConnexion extends Thread {
 		}
 	}
 	
+	public void callSetChannelSelected(String newGroupSelected) {
+		donnéesUtilisateur.setChannelSelected(newGroupSelected);
+	}
+	
+	public void callSetChannel(String newGroup) {
+		donnéesUtilisateur.SetChannel(newGroup);
+	}
+	
+	public void callAddChannels(String newGroup) {
+		donnéesUtilisateur.addInListGroup(newGroup);
+	}
+	
+	public Boolean callCheckExistingGroup(String group) {
+		return donnéesUtilisateur.checkExistingGroup(group);
+	}
+	
+	public String callGetPseudo() {
+		return donnéesUtilisateur.GetName();
+	}
+	
+	public String callGetGroup() {
+		return donnéesUtilisateur.GetChannel();
+	}
+	
+	public String callGetGroupSelected() {
+		return donnéesUtilisateur.getChannelSelected();
+	}
+	
+	public ArrayList<String> callGetListGroup() {
+		return donnéesUtilisateur.getListGroup();
+	}
+	
 	public void displayMessagesPerChannel(String text){
 		
 		GUI.clearChat();
@@ -173,7 +205,7 @@ public class MultiConnexion extends Thread {
 		GUI.setDisplay(X);
 	}
 	
-	public void displayUsername(String text){
+	public void displayUsernamePerChannel(String text){
 	
 		GUI.ClearDisplay();
 		String X = sauvegarde.getUsersChannelInFile("users-"+text+".txt");
@@ -193,13 +225,6 @@ public void displayUsersChannel() {
 	}
 	
 	
-//	public void displayUsersChannel(String text){
-//		
-//		GUI.clearChat();
-//		String[]Y=text.split(": ");
-//		//String X = sauvegarde.getUsersChannelInFile("sauvegarde-"+Y[1]+".txt");
-//		GUI.setDisplay(X);
-//	}
 	
 	public String ExtractName(String x)
 	{
@@ -225,7 +250,7 @@ public void displayUsersChannel() {
 	
 	public void PrintReply(String Chan,String Rep)
 	{
-		if(Chan.contentEquals(clientData.getChannelSelected())) {
+		if(Chan.contentEquals(donnéesUtilisateur.getChannelSelected())) {
 			System.out.println("Rep => "+ Rep);
 			String []Y=Rep.split("=");
 			System.out.println("Y[1] => "+ Y[1]);
@@ -271,58 +296,9 @@ public void displayUsersChannel() {
 	}
 	public void setChangedChannel()
 	{
-		GUI.setUserInChannel(clientData.GetName()+": "+clientData.GetChannel());
+		GUI.setUserInChannel(donnéesUtilisateur.GetName()+": "+donnéesUtilisateur.GetChannel());
 	}
 	
-	//objet utilisateur
-	class ClientData
-	{
-		public String ClientName;
-		public String channel;
-		public ArrayList<String> channels = new ArrayList<String>();
-		private String channelSelected = ""; 
-
-
-		
-		public void SetChannel(String Chan) {
-			channel=Chan;
-		}
-		
-		public void SetName(String name) {
-			ClientName=name;
-		}
-		
-		public String GetChannel() {
-			return channel;
-		}
-		
-		public String GetName() {
-			return ClientName;
-		}
-		
-		public void setChannelSelected(String channel) {
-			channelSelected = channel;
-		}
-		
-		public String getChannelSelected() {
-			return channelSelected;
-		}
-		
-		public void addChannels(String newChannel) {
-			channels.add(newChannel);
-			System.out.println("Channels : ");
-			for(String chan : channels) {
-				System.out.println(chan);
-			}
-		}
-		
-		public void removeChannels(String newChannel) {
-			channels.remove(newChannel);
-			System.out.println("Channels de " + this.GetName() + ": ");
-			for(String chan : channels) {
-				System.out.println(chan + "\n");
-			}
-		}
-	}
+	
 	
 }
