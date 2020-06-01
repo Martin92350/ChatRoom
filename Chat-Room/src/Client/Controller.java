@@ -24,7 +24,20 @@ public class Controller extends Thread {
 		//creation d'un utilisateur
 		donnéesUtilisateur=new Model();
 		GUI=gui;
-		sauvegarde = new Sauvegarde() ;
+		sauvegarde = new Sauvegarde();
+		
+		try {
+			this.out=new DataOutputStream(this.socket.getOutputStream());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			this.in=new DataInputStream(this.socket.getInputStream());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	//permet utilisateur d'envoyer tout type d'info au serveur
