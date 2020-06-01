@@ -37,6 +37,7 @@ public class MultiConnexion extends Thread {
 				System.out.println("sending changing channel: "+Text+"\n");
 				out.writeUTF(Text);
 				out.flush();
+				sauvegarde.setUsersChannelInFile(clientData.GetName(), clientData.getChannelSelected());
 			}
 			else if(Text.equals("new user"))
 			{
@@ -44,14 +45,19 @@ public class MultiConnexion extends Thread {
 				//"new user : le nom saisie par user = sur quel channel il se trouve"
 				out.writeUTF(Text+":"+clientData.GetName()+"="+clientData.GetChannel());
 				out.flush();
-				sauvegarde.setNameInFile(clientData.GetName());
+				sauvegarde.setUsersChannelInFile(clientData.GetName(), clientData.getChannelSelected());
 			}
 			else if(Text.matches("button selected : (.*)"))
 			{
+				System.out.println("text : " + Text);
 				out.writeUTF(Text);
 				out.flush();
+				
 				changeFileName(Text);
 				displayMessagesPerChannel(Text);
+				
+				changeUsersChannel(Text);
+				displayUsername(clientData.getChannelSelected());
 			}
 			else
 			{
@@ -78,6 +84,7 @@ public class MultiConnexion extends Thread {
 	{
 		try {
 			affichageConversationPrincipale();
+			displayUsersChannel();
 			sauvegardeUtilisateurs();
 			System.out.println("run");
 			//instance permettant d'avoir un flux d'entrée et de sortie (échange)
@@ -166,6 +173,34 @@ public class MultiConnexion extends Thread {
 		GUI.setDisplay(X);
 	}
 	
+	public void displayUsername(String text){
+	
+		GUI.ClearDisplay();
+		String X = sauvegarde.getUsersChannelInFile("users-"+text+".txt");
+		GUI.displaySavedUsers(X);
+	}
+	
+	public void affichageConversationPrincipale() {
+		
+		String oldMessages = sauvegarde.getInFile("sauvegarde-channel0.txt");
+		GUI.displaySavedMessaged(oldMessages);
+	}
+	
+public void displayUsersChannel() {
+		
+		String users = sauvegarde.getUsersChannelInFile("users-channel0.txt");
+		GUI.displaySavedUsers(users);
+	}
+	
+	
+//	public void displayUsersChannel(String text){
+//		
+//		GUI.clearChat();
+//		String[]Y=text.split(": ");
+//		//String X = sauvegarde.getUsersChannelInFile("sauvegarde-"+Y[1]+".txt");
+//		GUI.setDisplay(X);
+//	}
+	
 	public String ExtractName(String x)
 	{
 		String[]Y=x.split(":");
@@ -181,6 +216,11 @@ public class MultiConnexion extends Thread {
 	public void changeFileName(String text) {
 		String[]Y=text.split(": ");
 		sauvegarde.setnomDeFichier(Y[1]);
+	}
+	
+	public void changeUsersChannel(String text) {
+		String[]Y=text.split(": ");
+		sauvegarde.setSaveUsers(Y[1]);
 	}
 	
 	public void PrintReply(String Chan,String Rep)
@@ -203,16 +243,23 @@ public class MultiConnexion extends Thread {
 		}
 	}
 	
-	public void affichageConversationPrincipale() {
-		
-		String oldMessages = sauvegarde.getInFile("sauvegarde-channel0.txt");
-		GUI.displaySavedMessaged(oldMessages);
-	}
+
 	
+//	public void affichageNomUtilisateurDeChannel() {
+//		
+//		String UsersChannel = sauvegarde.getUsersChannelInFile("sauvegarde-usersnames.txt");
+//		GUI.displaySavedMessaged(UsersChannel);
+//	}
+//	
 	private void sauvegardeUtilisateurs() {
 		String oldUsers = sauvegarde.getNameInFile();
 		GUI.displaySavedUsers(oldUsers);
 	}
+	
+	/*private void saveUsersChannel() {
+		String UsersChannel = sauvegarde.getUsersChannelInFile();
+		GUI.displaySavedUsers(UsersChannel);
+	}*/
 	
 	public void setChannel(String x)
 	{

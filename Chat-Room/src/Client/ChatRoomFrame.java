@@ -155,6 +155,7 @@ public class ChatRoomFrame extends JFrame{
 				else
 				{
 					ClientThread.clientData.SetChannel("channel"+string);
+					ClientThread.clientData.setChannelSelected("channel"+string);
 					ClientThread.clientData.addChannels("channel"+string);
 					
 					JOptionPane.showMessageDialog(null, "Channel has been set: channel"+string);

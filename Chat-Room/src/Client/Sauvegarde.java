@@ -17,11 +17,15 @@ import java.io.InputStreamReader;
 public class Sauvegarde {
 	
 	public String nomDeFichier ;
+	public String usersChannel ;
 	
 	public Sauvegarde () {
 		
 		nomDeFichier = "sauvegarde-channel0.txt"; 
-	}
+		usersChannel = "users-channel0.txt";
+ 	}
+	
+	
 	
 	public void setnomDeFichier(String results) {
 		
@@ -34,6 +38,41 @@ public class Sauvegarde {
 		return nomDeFichier;
 	}
 	
+	public void setSaveUsers(String results) {
+		
+		usersChannel = "users-"+results+".txt";
+	}
+	
+	
+	public String getSaveUsers() {
+	
+		return usersChannel;
+	}
+	
+	
+//ecriture dans un fichier.txt la liste des noms des utilisateurs présent sur un canal en particulier 
+	
+	public void setUsersChannelInFile(String nom, String channel) {
+		
+		System.out.println("nom : " + nom);
+		System.out.println("channel : " + channel);
+
+		
+		//ecris dans fichier txt tout les  messages qui appraissent sur interface
+		try  {
+			BufferedWriter out = new BufferedWriter(new FileWriter("users-" +channel+".txt", true));
+			out.write( nom +"\n");
+			out.close();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
+//ecriture dans un fichier.txt le contenu de la conversation des utilisateurs présent sur un canal en particulier 
 	public void setInFile(String results) {
 		
 		System.out.println("save "+results);
@@ -50,6 +89,7 @@ public class Sauvegarde {
 		}
 	}
 	
+//ecriture dans un fichier.txt la liste des noms des utilisateurs présent sur le canal principale	
 	public void setNameInFile(String results) {
 		
 		System.out.println("save "+results);
@@ -66,7 +106,37 @@ public class Sauvegarde {
 		}
 	}
 	
-	
+	public String getUsersChannelInFile(String usersChannel) {
+		
+		InputStream is;
+		try {
+			is = new FileInputStream(usersChannel);
+			BufferedReader buf = new BufferedReader(new InputStreamReader(is)); 
+			String line;
+			try {
+				line = buf.readLine();
+				StringBuilder sb = new StringBuilder(); 
+				while(line != null){ 
+					sb.append(line).append("\n"); 
+					line = buf.readLine(); 
+				} 
+				String fileAsString = sb.toString(); 
+				System.out.println("Contents (before Java 7) : " + fileAsString);
+				//GUI.setDisplay("bonjour");
+				return fileAsString ;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+
+	return "" ;
+	}
+
 	public String getInFile(String nomDuFichier) {
 		
 		InputStream is;
@@ -95,7 +165,7 @@ public class Sauvegarde {
 			e.printStackTrace();
 		} 
 
-	return "echec" ;
+	return "" ;
 	}
 	
 	public String getNameInFile() {
@@ -126,6 +196,6 @@ public class Sauvegarde {
 			e.printStackTrace();
 		} 
 
-	return "echec" ;
+	return "" ;
 	}
 }
